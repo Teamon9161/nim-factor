@@ -73,18 +73,20 @@ proc update*(rm: var RollingMeanManaged, newVal: float): float =
   let evicted = rm.ring.push(newVal)
   updateImpl(rm, newVal, evicted)
 
+proc rollingMean*(xs: openArray[float]; window: int; minPeriods: int = 0): seq[float] =
+  ## Compute rolling mean over an array; uses managed ring buffer internally.
+  var rm = initRollingMeanManaged(window, minPeriods)
+  result = newSeq[float](xs.len)
+  var i = 0
+  for x in xs:
+    result[i] = rm.update(x)
+    inc i
+
 proc testRollingMean*() =
   ## Simple sanity test: feed an array, collect outputs, compare to expected.
-  var rm = initRollingMeanManaged(3, 2)
-
   let inputs = [1.0, NaN, 3.0, 5.0]
-  var outputs: seq[float] = @[]
-
-  for x in inputs:
-    outputs.add rm.update(x)
-
-  let expected = @[NaN, NaN, 2.0, 4.0]
-  assertSeqAlmostEqual(expected, outputs)
+  assertSeqAlmostEqual([NaN, NaN, 2.0, 4.0], inputs.rollingMean(3, 2))
+  assertSeqAlmostEqual([1.0, NaN, 2.0, 4.0], inputs.rollingMean(3, 1))
 
 when isMainModule:
   testRollingMean()
