@@ -86,7 +86,7 @@ proc testRollingMean*() =
   ## Simple sanity test: feed an array, collect outputs, compare to expected.
   let inputs = [1.0, NaN, 3.0, 5.0]
   assertSeqAlmostEqual([NaN, NaN, 2.0, 4.0], inputs.rollingMean(3, 2))
-  assertSeqAlmostEqual([1.0, NaN, 2.0, 4.0], inputs.rollingMean(3, 1))
+  assertSeqAlmostEqual([1.0, 1.0, 2.0, 4.0], inputs.rollingMean(3, 1))
 
 when isMainModule:
   testRollingMean()
