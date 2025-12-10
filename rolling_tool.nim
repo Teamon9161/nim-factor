@@ -1,6 +1,7 @@
 import math
 import testing
 import ring_buffer
+import vec
 
 type
   RollingMeanKind = enum
@@ -73,20 +74,23 @@ proc update*(rm: var RollingMeanManaged, newVal: float): float =
   let evicted = rm.ring.push(newVal)
   updateImpl(rm, newVal, evicted)
 
-proc rollingMean*(xs: openArray[float]; window: int; minPeriods: int = 0): seq[float] =
-  ## Compute rolling mean over an array; uses managed ring buffer internally.
+proc rollingMean*[T: SomeNumber, V: Vec1[T]](xs: V; window: int; minPeriods: int = 0): auto =
+  ## Generic rolling mean over 1-D Vec1 (openArray, NumpyArray), always returns float container.
   var rm = initRollingMeanManaged(window, minPeriods)
-  result = newSeq[float](xs.len)
+  var res = initOut(xs)
   var i = 0
-  for x in xs:
-    result[i] = rm.update(x)
+  let n = len(xs)
+  while i < n:
+    res[i] = rm.update(float(xs[i]))
     inc i
+  res
 
 proc testRollingMean*() =
   ## Simple sanity test: feed an array, collect outputs, compare to expected.
   let inputs = [1.0, NaN, 3.0, 5.0]
   assertSeqAlmostEqual([NaN, NaN, 2.0, 4.0], inputs.rollingMean(3, 2))
   assertSeqAlmostEqual([1.0, 1.0, 2.0, 4.0], inputs.rollingMean(3, 1))
+  assertSeqAlmostEqual([1.0, 1.5, 2.5], [1, 2, 3].rollingMean(2))
 
 when isMainModule:
   testRollingMean()

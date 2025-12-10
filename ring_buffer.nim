@@ -1,5 +1,3 @@
-import math
-
 type
   RingBuffer* = object
     data: seq[float]
