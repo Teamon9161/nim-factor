@@ -97,7 +97,7 @@ proc testRollingMean*() =
   let inputs = @[1.0, NaN, 3.0, 5.0]
   assertSeqAlmostEqual(@[NaN, NaN, 2.0, 4.0], inputs.rollingMean(3, 2))
   assertSeqAlmostEqual(@[1.0, 1.0, 2.0, 4.0], inputs.rollingMean(3, 1))
-  # assertSeqAlmostEqual(@[1.0, 1.5, 2.5], @[1, 2, 3].rollingMean(2))
+  assertSeqAlmostEqual(@[1.0, 1.5, 2.5], @[1, 2, 3].rollingMean(2))
 
 when isMainModule:
   testRollingMean()

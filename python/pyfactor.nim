@@ -9,20 +9,18 @@ import nimpy
 #   initNumpyArray[T](np.ascontiguousarray(arr.obj()))
 
 proc rollingMeanPy(arr: NumpyArray[float]; window: int; min_periods: int = 0): NumpyArray[float] {.exportpy: "rolling_mean".} =
-  ## Fast path: force contiguous buffer once, then iterate with raw pointers.
-  # let input = arr.toContiguous()
+  ## Full semantics: honor min_periods and NaN handling; external window management.
   let input = arr
   let n = input.len
-  var rm = initRollingMeanManaged(window, min_periods)
+  var rm = initRollingMean(window, min_periods)
 
   var res = uninit[float](input, n)
   let src = input.toUnsafeView()
   let dst = res.toUnsafeView()
 
-  {.push checks: off, boundChecks: off.}
   var i = 0
   while i < n:
-    dst[i] = rm.update(src[i])
+    let oldVal = if i >= window: src[i - window] else: NaN
+    dst[i] = rm.update(src[i], oldVal)
     inc i
-  {.pop.}
   res
