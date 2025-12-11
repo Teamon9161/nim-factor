@@ -9,7 +9,7 @@ proc initRingBuffer*(size: int): RingBuffer =
     raise newException(ValueError, "size must be positive")
   RingBuffer(data: newSeq[float](size), pos: 0, filled: false)
 
-proc push*(rb: var RingBuffer, x: float): float =
+proc push*(rb: var RingBuffer, x: float): float {.inline.}=
   ## Returns the value that is being evicted; NaN when the buffer is not full yet.
   let old = if rb.filled: rb.data[rb.pos] else: NaN
   rb.data[rb.pos] = x
