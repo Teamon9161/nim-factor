@@ -67,11 +67,11 @@ proc updateImpl[T](rm: var T, newVal, oldVal: float): float =
     return NaN
   rm.sum / float(rm.count)
 
-proc update*(rm: var RollingMeanExternal, newVal, oldVal: float): float =
+proc update*(rm: var RollingMeanExternal, newVal, oldVal: float): float {.inline.} =
   ## Incremental update with externally managed ring buffer.
   updateImpl(rm, newVal, oldVal)
 
-proc update*(rm: var RollingMeanManaged, newVal: float): float =
+proc update*(rm: var RollingMeanManaged, newVal: float): float {.inline.} =
   ## Incremental update using the managed ring buffer.
   let evicted = rm.ring.push(newVal)
   updateImpl(rm, newVal, evicted)
