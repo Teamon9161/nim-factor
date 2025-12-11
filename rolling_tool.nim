@@ -51,7 +51,7 @@ proc initRollingMeanManaged*(window: int; minPeriods: int = 0): RollingMeanManag
     ring: initRingBuffer(window),
   )
 
-proc updateImpl[T](rm: var T, newVal, oldVal: float): float =
+proc updateImpl[T](rm: var T, newVal, oldVal: float): float {.inline.} =
   ## Incremental update logic shared by external/managed variants.
   ## - oldVal is the value falling out of the window; pass NaN when none.
   ## - newVal is the value entering the window; pass NaN to skip.
@@ -79,6 +79,7 @@ proc update*(rm: var RollingMeanManaged, newVal: float): float {.inline.} =
 template rollingMean*(xs; window: int, minPeriods: int = 0): auto =
   mixin uninit
   block:
+    {.push checks: off, boundChecks: off.}
     var rm = initRollingMeanManaged(window, minPeriods)
     let n = xs.len
     var res = uninit[float](xs, n)
@@ -87,7 +88,9 @@ template rollingMean*(xs; window: int, minPeriods: int = 0): auto =
     while i < n:
       res[i] = rm.update(float(xs[i]))
       inc i
+    {.pop.}
     res
+  
 
 proc testRollingMean*() =
   ## Simple sanity test: feed an array, collect outputs, compare to expected.

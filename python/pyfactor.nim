@@ -19,8 +19,10 @@ proc rollingMeanPy(arr: NumpyArray[float]; window: int; min_periods: int = 0): N
   let src = input.toUnsafeView()
   let dst = res.toUnsafeView()
 
+  {.push checks: off, boundChecks: off.}
   var i = 0
   while i < n:
     dst[i] = rm.update(src[i])
     inc i
+  {.pop.}
   res
