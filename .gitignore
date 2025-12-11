@@ -4,3 +4,4 @@ nimcache/
 *.egg-info
 build/
 *.py[cd]
+*.so

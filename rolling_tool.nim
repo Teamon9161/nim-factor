@@ -1,7 +1,6 @@
 import math
 import testing
 import ring_buffer
-import vec
 
 type
   RollingMeanKind = enum
@@ -18,6 +17,9 @@ type
   RollingMeanExternal* = RollingMean[rmExternal]
   RollingMeanManaged* = RollingMean[rmManaged]
 
+
+proc uninit*[T](xs: openArray[auto]; len: int): seq[T] =
+  newSeq[T](len)
 
 proc normalizeMinPeriods(window: int; minPeriods: int): int =
   ## Validate and compute minPeriods; when 0, default to window div 2 (at least 1).
@@ -74,21 +76,8 @@ proc update*(rm: var RollingMeanManaged, newVal: float): float =
   let evicted = rm.ring.push(newVal)
   updateImpl(rm, newVal, evicted)
 
-# proc rollingMean*[T: SomeNumber, V: Vec1[T]](
-#   xs: V; window: int; minPeriods: int = 0
-# ): auto =
-#   var rm = initRollingMeanManaged(window, minPeriods)
-#   let n = xs.len
-#   # var res = initLike[T, float](typedesc[V], n)
-#   var res = newSeq[float](n)
-
-#   var i = 0
-#   while i < n:
-#     res[i] = rm.update(float(xs[i]))
-#     inc i
-#   res
-
-template rollingMean(xs; window: int, minPeriods: int = 0): auto =
+template rollingMean*(xs; window: int, minPeriods: int = 0): auto =
+  mixin uninit
   block:
     var rm = initRollingMeanManaged(window, minPeriods)
     let n = xs.len
