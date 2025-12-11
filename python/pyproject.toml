@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "nimporter"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyfactor"
+version = "0.0.0"
+description = "Python bindings for Nim factor functions"
+requires-python = ">=3.8"

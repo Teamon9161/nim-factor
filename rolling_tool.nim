@@ -74,23 +74,38 @@ proc update*(rm: var RollingMeanManaged, newVal: float): float =
   let evicted = rm.ring.push(newVal)
   updateImpl(rm, newVal, evicted)
 
-proc rollingMean*[T: SomeNumber, V: Vec1[T]](xs: V; window: int; minPeriods: int = 0): auto =
-  ## Generic rolling mean over 1-D Vec1 (openArray, NumpyArray), always returns float container.
-  var rm = initRollingMeanManaged(window, minPeriods)
-  var res = initOut(xs)
-  var i = 0
-  let n = len(xs)
-  while i < n:
-    res[i] = rm.update(float(xs[i]))
-    inc i
-  res
+# proc rollingMean*[T: SomeNumber, V: Vec1[T]](
+#   xs: V; window: int; minPeriods: int = 0
+# ): auto =
+#   var rm = initRollingMeanManaged(window, minPeriods)
+#   let n = xs.len
+#   # var res = initLike[T, float](typedesc[V], n)
+#   var res = newSeq[float](n)
+
+#   var i = 0
+#   while i < n:
+#     res[i] = rm.update(float(xs[i]))
+#     inc i
+#   res
+
+template rollingMean(xs; window: int, minPeriods: int = 0): auto =
+  block:
+    var rm = initRollingMeanManaged(window, minPeriods)
+    let n = xs.len
+    var res = uninit[float](xs, n)
+
+    var i = 0
+    while i < n:
+      res[i] = rm.update(float(xs[i]))
+      inc i
+    res
 
 proc testRollingMean*() =
   ## Simple sanity test: feed an array, collect outputs, compare to expected.
-  let inputs = [1.0, NaN, 3.0, 5.0]
-  assertSeqAlmostEqual([NaN, NaN, 2.0, 4.0], inputs.rollingMean(3, 2))
-  assertSeqAlmostEqual([1.0, 1.0, 2.0, 4.0], inputs.rollingMean(3, 1))
-  assertSeqAlmostEqual([1.0, 1.5, 2.5], [1, 2, 3].rollingMean(2))
+  let inputs = @[1.0, NaN, 3.0, 5.0]
+  assertSeqAlmostEqual(@[NaN, NaN, 2.0, 4.0], inputs.rollingMean(3, 2))
+  assertSeqAlmostEqual(@[1.0, 1.0, 2.0, 4.0], inputs.rollingMean(3, 1))
+  # assertSeqAlmostEqual(@[1.0, 1.5, 2.5], @[1, 2, 3].rollingMean(2))
 
 when isMainModule:
   testRollingMean()

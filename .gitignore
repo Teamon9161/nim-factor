@@ -1,3 +1,6 @@
 rolling_tool
 nimcache/
 *.exe
+*.egg-info
+build/
+*.py[cd]
